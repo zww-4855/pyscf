@@ -24,17 +24,27 @@ Note you will see warning message on the screen:
 '''
 
 mol = gto.M()
-n = 10
-mol.nelectron = n
+n = 6 
+mol.nelectron = 6
 
 mf = scf.RHF(mol)
 h1 = numpy.zeros((n,n))
-for i in range(n-1):
-    h1[i,i+1] = h1[i+1,i] = -1.0
-h1[n-1,0] = h1[0,n-1] = -1.0  # PBC
+for i in range(n):#(n-1):
+    h1[i,i]=-1.0
+    #h1[i,i+1] = h1[i+1,i] = -1.0
+h1[n-1,0] = h1[0,n-1] = 1.0 #-1.0  # PBC
+
+
 eri = numpy.zeros((n,n,n,n))
-for i in range(n):
-    eri[i,i,i,i] = 4.0
+for i in range(n-1):
+#    eri[i,i,i,i] = -2.0
+    eri[i,i+1,i+1,i]=-2.0
+
+#eri[5,5,5,5]=-2.0
+#    if i +2 <= n:
+#        for j in range(i-1,i+2,2):
+#            eri[i,i,j,j]=1.0
+
 
 mf.get_hcore = lambda *args: h1
 mf.get_ovlp = lambda *args: numpy.eye(n)
@@ -43,7 +53,7 @@ mf.get_ovlp = lambda *args: numpy.eye(n)
 mf._eri = ao2mo.restore(8, eri, n)
 
 mf.kernel()
-
+print(mf.mo_energy)
 # If you need to run post-HF calculations based on the customized Hamiltonian,
 # setting incore_anyway=True to ensure the customized Hamiltonian (the _eri
 # attribute) to be used.  Without this parameter, some post-HF method

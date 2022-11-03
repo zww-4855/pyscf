@@ -38,9 +38,25 @@ mf._eri = ao2mo.restore(8, eri, n)
 mf.init_guess = '1e'
 mf.kernel()
 
+
+
+fock=mf.get_fock()
+print('fock',fock)
 from pyscf import ci
-myci = ci.CISD(mf).run()
-print(myci.e_corr)
+
+
+myci=ci.CISD(mf)
+old_cisdvec=myci.cisdvec_to_amplitudes
+def cisdvec_to_amplitudes(civec, nmo, nocc,copy):
+    c0,c1,c2=old_cisdvec(civec, nmo, nocc,copy)
+    c1=0.0*c1
+    return c0,c1,c2
+
+myci.cisdvec_to_amplitudes = cisdvec_to_amplitudes
+myci.kernel()
+
+#myci = ci.CISD(mf).run()
+#print(myci.e_corr)
 
 
 mo_energy=mf.mo_energy
